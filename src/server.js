@@ -33,7 +33,7 @@ function setupProxy(app) {
 }
 
 function setupWebSocket(app) {
-  app.ws('/', function(ws, req) {
+  app.ws('/ws', function(ws, req) {
     ws.on('message', function(msg) {
       const json = JSON.parse(msg)
       if (json.type === 'sprintNumberChange') {

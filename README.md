@@ -90,6 +90,19 @@ Change the Sprint number.
 
 ![Screenshot](doc/settings.png)
 
+## HTTPS
+
+If run behind a HTTPS terminator, you have to offload the secure WebSocket (ws://) connection as well. On Nginx you can this via:
+```
+location /ws/ {
+    // this proxies the wss:// connection to ws://
+    proxy_pass http://127.0.0.1:8083;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+}
+```
+
 ## Development
 
 * ```yarn install``` - fetch dependencies

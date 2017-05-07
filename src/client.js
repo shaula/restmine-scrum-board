@@ -92,7 +92,7 @@ const vue = new Vue({
       this.bus.$emit('loading', 'websocket')
 
       let isFirstMessage = true
-      this.ws = new WebSocket(this.apiUrl.replace('http://', 'ws://'))
+      this.ws = new WebSocket(this.apiUrl.replace(/^http/, 'ws') + '/ws/')
       /*this.ws.onopen = function () {
         this.ws.send(JSON.stringify({type: 'init'}));
       }.bind(this);*/
