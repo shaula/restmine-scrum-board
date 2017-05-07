@@ -1,0 +1,53 @@
+{
+  "port": 8080,
+  "redmine": {
+    "server": "http://127.0.0.1:3000",
+    "api_key": "",
+    "api_key_comment": "You can find your API key on your account page ( /my/account ) when logged in, on the right-hand pane of the default layout.",
+    "customSprintNumberFieldId": 3,
+    "customStoryPointsFieldId": 1,
+    "columns": {
+      "new": {
+        "abbr": "new",
+        "name": "New",
+        "statuses": [
+          "New",
+          "Accepted",
+          "Reopened",
+          "Feedback Provided"
+        ]
+      },
+      "feedback": {
+        "abbr": "feedback",
+        "name": "Feedback Needed",
+        "statuses": [
+          "Feedback needed"
+        ]
+      },
+      "progress": {
+        "abbr": "progress",
+        "name": "In Progress",
+        "statuses": [
+          "In Progress"
+        ]
+      },
+      "test": {
+        "abbr": "test",
+        "name": "To Test/Review",
+        "statuses": [
+          "To test"
+        ]
+      },
+      "done": {
+        "abbr": "done",
+        "name": "To Deploy/Done",
+        "statuses": [
+          "To Deploy",
+          "Closed"
+        ]
+      }
+    }
+  },
+  "pollingCycleInSeconds": 10,
+  "velocityHistoryLength": 10
+}

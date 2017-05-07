@@ -1,0 +1,9 @@
+version: '2'
+
+services:
+  client:
+    build: .
+    volumes:
+      - ./config:/usr/src/app/config
+    ports:
+      - "8083:8080"
