@@ -29,6 +29,11 @@
           <a href="#" class="c-tabs-nav__link">Settings</a>
         </li>
       </ul>
+      <div id="userListHandle" v-if="loadingCount == 0">
+        <div id="userList">
+          <UserList :headline="'Assignees'" :users="issueUsers" :inactiveUserIds="inactiveUserIds" />
+        </div>
+      </div>
       <div class="c-tab is-active">
         <div class="c-tab__content">
           <span v-show="loadingCount" class="icon icon-loader"></span>
@@ -45,14 +50,14 @@
 
             <DefaultSwimlane v-if="settings.view == 'default'"
                              :columns="redmineConfig.columns"
-                             :issues="issues"
+                             :issues="activeIssues"
                              :projectHierarchy="projectHierarchy"
                              :projects="projects"
                              :users="users" />
 
             <ProjectSwimlane v-if="settings.view == 'project'"
                              :columns="redmineConfig.columns"
-                             :issues="issues"
+                             :issues="activeIssues"
                              :projectHierarchy="projectHierarchy"
                              :projects="projects"
                              :users="users" />
@@ -62,9 +67,9 @@
       <div class="c-tab">
         <div class="c-tab__content">
           <div id="stats">
-            <TrackerSummary :issues="issues" />
-            <UserSummary :issues="issues" :users="users" />
-            <ProjectSummary :issues="issues" :projects="projects" />
+            <TrackerSummary :issues="activeIssues" />
+            <UserSummary :issues="activeIssues" :users="users" />
+            <ProjectSummary :issues="activeIssues" :projects="projects" />
           </div>
         </div>
       </div>
@@ -277,7 +282,7 @@
     background-color: #fff;
     border: 1px solid #ddd;
     border-radius: 6px;
-    padding: 10px;
+    padding: 10px 10px 10px 20px;
     overflow: hidden;
   }
 
@@ -319,10 +324,51 @@
   .with-settings.is-active .settings {
     color: #333;
   }
+
+  #userListHandle {
+    width: 25px;
+    overflow: hidden;
+    position: fixed;
+    top: 140px;
+    left: 9px;
+    background-color: rgb(66, 139, 202);
+    color: white;
+    border: 1px solid rgb(66, 139, 202);
+    border-radius: 0 10px 10px 0;
+    z-index: 100;
+    max-height: 80%;
+  }
+  #userListHandle,
+  #userListHandle .headline {
+    height: 100px;
+  }
+  #userListHandle .headline {
+    transform: rotate(-90deg);
+    width: 100px;
+  }
+  #userListHandle .hasInactive .headline {
+    color: #ffb6d7;
+  }
+  #userListHandle:hover {
+    width: auto;
+    height: auto;
+    overflow-y: auto;
+  }
+  #userListHandle:hover .headline {
+    margin: 0;
+    transform: inherit;
+    width: 100%;
+    height: auto;
+  }
+  #userListHandle:hover .user:hover {
+    border-color: darkblue;
+  }
 </style>
 
 <script>
+  import Avatar from './components/Avatar'
   import TrackerSummary from './components/TrackerSummary'
+  import UserList from './components/UserList'
   import UserSummary from './components/UserSummary'
   import VelocityHistory from './components/VelocityHistory'
   import ProjectSummary from './components/ProjectSummary'
@@ -421,16 +467,28 @@
       return {
         settings: {
           view: 'default'
-        }
+        },
+        inactiveUserIds: []
       }
     },
     created () {
-      this.bus.$on('issueClick', function (id) {
-        window.open(this.redmineConfig.url + '/issues/' + id, 'redmine')
-      }.bind(this))
+      this.bus.$on('toggleUserSelection', function (idsOrId) {
+        let ids = []
+        if (idsOrId instanceof Array) {
+          ids = idsOrId
+        } else {
+          ids.push(parseInt(idsOrId))
+        }
 
-      this.bus.$on('projectClick', function (id) {
-        window.open(this.redmineConfig.url + '/projects/' + id, 'redmine')
+        for (let idsIndex in ids) {
+          let id = ids[idsIndex]
+          const index = this.inactiveUserIds.indexOf(id)
+          if (index === -1) {
+            this.inactiveUserIds.push(id)
+          } else {
+            this.inactiveUserIds.splice(index, 1)
+          }
+        }
       }.bind(this))
 
       this.bus.$on('loaded', function (type) {
@@ -484,6 +542,62 @@
         this.sortProjectHierarchy(hierarchy)
 
         return hierarchy
+      },
+      issueUsers () {
+        if (!Object.keys(this.projects).length || !Object.keys(this.issues).length) {
+          console.log('Waiting for projects & issues')
+          return {}
+        }
+
+        let users = {}
+
+        for (let index in this.issues) {
+          if (this.issues.hasOwnProperty(index)) {
+            let issue = this.issues[index]
+
+            if (issue.assigned_to) {
+              let userId = issue.assigned_to.id
+              users[userId] = this.users[userId]
+            } else {
+              users[0] = {
+                id: 0,
+                login: '--',
+              }
+            }
+          }
+        }
+
+        return users
+      },
+      activeUserIds () {
+        if (!Object.keys(this.issueUsers).length) {
+          console.log('Waiting for issueUsers')
+          return []
+        }
+
+        const activeUserIds = []
+        for (let id in this.issueUsers) {
+          if (this.issueUsers.hasOwnProperty(id)) {
+            id = parseInt(id)
+            if (this.inactiveUserIds.indexOf(id) === -1) {
+              activeUserIds.push(id)
+            }
+          }
+        }
+
+        return activeUserIds
+      },
+      activeIssues () {
+        const activeIssues = {}
+        for (let id in this.issues) {
+          if (this.issues.hasOwnProperty(id)) {
+            const assigneeId = this.issues[id].assigned_to ? this.issues[id].assigned_to.id : 0
+            if (this.activeUserIds.indexOf(assigneeId) !== -1) {
+              activeIssues[id] = this.issues[id]
+            }
+          }
+        }
+        return activeIssues
       }
     },
     methods: {
@@ -495,8 +609,8 @@
       },
       issuesByStatuses (statuses) {
         let data = []
-        for (let index in this.issues) {
-          if (this.issues.hasOwnProperty(index)) {
+        for (let index in this.activeIssues) {
+          if (this.activeIssues.hasOwnProperty(index)) {
             if (statuses.indexOf(this.issues[index].status.name) > -1) {
               data.push(this.issues[index])
             }
@@ -556,10 +670,12 @@
       }
     },
     components: {
+      Avatar,
       DefaultSwimlane,
       ProjectSummary,
       ProjectSwimlane,
       TrackerSummary,
+      UserList,
       UserSummary,
       VelocityHistory
     }

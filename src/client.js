@@ -103,6 +103,7 @@ const vue = new Vue({
 
         if (json.type === 'config') {
           this.redmineConfig = json.config
+          Vue.prototype.redmineUrl = this.redmineConfig.url;
         } else if (json.type === 'sprintNumberChange') {
           this.redmineConfig.sprintNumber = json.sprintNumber
           this.bus.$emit('loaded')

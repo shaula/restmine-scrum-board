@@ -2,17 +2,19 @@
     <div class="issue"
          :title="issue.description">
         <div class="issue-group-about">
-            <span class="issue-tracker" @click="bus.$emit('issueClick', issue.id)">{{ trackerName }}</span>
-            <span class="issue-subject" @click="bus.$emit('issueClick', issue.id)">{{ subject }}</span>
-            <span v-if="!hideProject" class="issue-project" :class="'project' + issue.project.id"
-                  @click="bus.$emit('projectClick', issue.project.id)">{{ project }}</span>
+            <a class="issue-subject" :href="issueUrl">
+                <span class="issue-tracker">{{ trackerName }}</span>
+                {{ subject }}
+            </a>
+            <a v-if="!hideProject" class="issue-project"
+               :class="'project' + issue.project.id"
+               :href="projectUrl">{{ project }}</a>
         </div>
 
         <slot />
 
         <div class="issue-group-assignee">
-            <img :src="assigneeAvatarUrl" />
-            <span>{{ assigneeName }}</span>
+            <Avatar :user="assignee" />
         </div>
 
         <div class="issue-group-status">
@@ -41,6 +43,7 @@
 
     a {
         color: #42b983;
+        text-decoration: none;
     }
 
     .issue {
@@ -51,6 +54,14 @@
         border-radius: 4px;
         text-overflow: ellipsis;
         overflow: hidden;
+    }
+
+    .issue a {
+        color: black;
+    }
+
+    .issue a:hover {
+        color: #42b983;
     }
 
     .issue-group-about {
@@ -76,9 +87,11 @@
         bottom: 0;
         right: 2px;
         text-align: right;
+        max-width: 60%;
     }
 
-    .issue span {
+    .issue span,
+    .issue a {
         display: block;
     }
 
@@ -90,8 +103,7 @@
         margin: 5px 0;
     }
 
-    .issue .issue-tracker,
-    .issue .issue-subject {
+    .issue .issue-tracker {
         display: inline;
     }
 
@@ -105,8 +117,8 @@
 </style>
 
 <script>
-  const md5 = require('md5')
   import Draggable from 'vuedraggable'
+  import Avatar from './Avatar'
 
   export default {
     name: 'issue',
@@ -145,21 +157,16 @@
       trackerName () {
         return this.issue.tracker.name
       },
-      assigneeName () {
-        return this.assignee ? this.assignee.login : ''
+      issueUrl () {
+        return this.redmineUrl + '/issues/' + this.issue.id
       },
-      assigneeAvatarUrl () {
-        let url
-        if (!this.assignee) {
-          url = '/static/avatar-unassigned.png'
-        } else {
-          url = 'https://www.gravatar.com/avatar/' + md5(String(this.assignee.mail).toLowerCase()) + '?s=50'
-        }
-        return url
-      }
+      projectUrl () {
+        return this.redmineUrl + '/projects/' + this.issue.project.id
+      },
     },
     components: {
-      Draggable
+      Draggable,
+      Avatar
     }
   }
 </script>
