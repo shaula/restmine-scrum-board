@@ -116,4 +116,3 @@ location /ws/ {
 * Issues tab
     * drag & drop issues across status
     * drag & drop users onto issues
-    * user-filter: show issues assigned to chosen user
