@@ -10,7 +10,7 @@
 
         <ul>
             <li class="user"
-                v-for="user in sortedUsers"
+                v-for="user in sortedUsers" :key="user.id"
                 :class="{inactive: inactiveUserIds.indexOf(user.id) !== -1}"
                 @click="bus.$emit('toggleUserSelection', user.id)">
                 <Avatar :user="user" />

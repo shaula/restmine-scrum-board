@@ -4,7 +4,7 @@
 
         <IssuesColumns :columns="columns" :issues="projectIssues" :hideProject="true" :users="users" />
 
-        <ProjectSwimlane v-for="projectEntry in projectHierarchy.subProjects"
+        <ProjectSwimlane v-for="projectEntry in projectHierarchy.subProjects" :key="projectEntry.projectId"
                          :columns="columns"
                          :issues="issues"
                          :projectHierarchy="projectEntry"
@@ -45,6 +45,15 @@
             }
           }
         }
+
+        /* sort by updated_on DESC */
+        issues = issues.sort(function (a, b) {
+          let aUpdatedOn = new Date(a.updated_on)
+          let bUpdatedOn =  new Date(b.updated_on)
+
+          return (aUpdatedOn < bUpdatedOn) ? 1 : ((aUpdatedOn > bUpdatedOn) ? -1 : 0)
+        })
+
         return issues
       }
     },

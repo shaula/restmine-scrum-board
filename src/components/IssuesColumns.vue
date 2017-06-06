@@ -1,7 +1,7 @@
 <template>
     <div class="row" v-drag-and-drop:options="options">
-        <div v-for="column in columns" class="column" :class="'column-' + column.abbr">
-            <Issue v-for="issue in issuesByColumn[column.abbr]"
+        <div v-for="column in columns" class="column" :key="column.abbr" :class="'column-' + column.abbr">
+            <Issue v-for="issue in issuesByColumn[column.abbr]" :key="issue.id"
                    :hideProject="hideProject"
                    :assignee="assigneeOf(issue)"
                    :author="authorOf(issue)"

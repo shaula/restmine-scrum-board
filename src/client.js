@@ -50,6 +50,7 @@ const vue = new Vue({
       sprintNumber: null,
       url: null
     },
+    status: 'online',
     users: {},
     velocity: []
   },
@@ -67,25 +68,47 @@ const vue = new Vue({
     }.bind(this))
 
     this.bus.$on('loading', function () {
-      this.loadingCount++
+      if (this.loadingCount !== false) {
+        this.loadingCount++
+      }
     }.bind(this))
 
     this.bus.$on('loaded', function () {
       this.loadingCount--
     }.bind(this))
 
+    this.bus.$on('offline', function (evt) {
+      if (evt.message.match(/NetworkError/)) {
+        this.status = 'offline'
+        this.loadingCount = false
+      }
+    }.bind(this))
+
+    window.addEventListener('offline', function() {
+      this.status = 'offline'
+      this.loadingCount = false
+    }.bind(this), true)
+
     // setup data
     this.setupWebSocket() // loads issues as well
 
     this.bus.$emit('loading', 'projects')
-    this.loadProjects().then(function () {
-      this.bus.$emit('loaded', 'projects')
-    }.bind(this))
+    this.loadProjects()
+      .then(function () {
+        this.bus.$emit('loaded', 'projects')
+      }.bind(this))
+      .catch(function (evt) {
+        this.bus.$emit('offline', evt)
+      }.bind(this))
 
     this.bus.$emit('loading', 'users')
-    this.loadUsers().then(function () {
-      this.bus.$emit('loaded', 'users')
-    }.bind(this))
+    this.loadUsers()
+      .then(function () {
+        this.bus.$emit('loaded', 'users')
+      }.bind(this))
+      .catch(function (evt) {
+        this.bus.$emit('offline', evt)
+      }.bind(this))
   },
   methods: {
     setupWebSocket () {
@@ -123,6 +146,33 @@ const vue = new Vue({
           }.bind(this))
         }
       }.bind(this)
+
+      this.ws.onclose = function (evt) {
+        if (evt.code === 3001) {
+          console.log('WebSocket closed')
+        } else {
+          console.log('WebSocket connection error')
+        }
+        this.reconnectWebSocket()
+      }.bind(this)
+
+      this.ws.onerror = function (evt) {
+        if (this.ws.readyState === 1) {
+          console.log('WebSocket error:' + evt.type)
+          this.reconnectWebSocket()
+        }
+      }.bind(this);
+    },
+    reconnectWebSocket: function () {
+      console.error('set offline')
+      this.status = 'offline'
+      this.loadingCount = false
+
+      window.setTimeout(function () {
+        console.debug('Try to re-establish WebSocket connection')
+        this.loadingCount = 0
+        this.setupWebSocket();
+      }.bind(this), 10000)
     },
     setIssues (data, lastModified) {
       if (Object.keys(this.issues).length !== data.length || this.issuesLastModified !== lastModified) {
@@ -143,6 +193,12 @@ const vue = new Vue({
       let params = {
         offset: offset,
         limit: 100
+      }
+
+      let cachedValue = this.getCachedValue('users', 86400)
+      if (cachedValue) {
+        this.users = cachedValue
+        return Promise.resolve()
       }
 
       return fetch(this.apiUrl + '/users.json' + window.paramsToQuery(params), {mode: 'cors'})
@@ -166,6 +222,8 @@ const vue = new Vue({
             return this.loadUsers(response.offset + response.limit)
           } else {
             this.users = this.tmpUsers
+
+            this.cacheValue('users', this.users)
           }
         }.bind(this))
     },
@@ -175,8 +233,17 @@ const vue = new Vue({
         limit: 100
       }
 
+      let cachedValue = this.getCachedValue('projects', 86400)
+      if (cachedValue) {
+        this.projects = cachedValue
+        return Promise.resolve()
+      }
+
       return fetch(this.apiUrl + '/projects.json' + window.paramsToQuery(params), {mode: 'cors'})
         .then(function (response) {
+          if (response.status !== 200) {
+            throw {message: 'NetworkError: ' + response.status}
+          }
           return response.json()
         })
         .then(function (response) {
@@ -196,10 +263,29 @@ const vue = new Vue({
             return this.loadProjects(response.offset + response.limit)
           } else {
             this.projects = this.tmpProjects
+
+            this.cacheValue('projects', this.projects)
           }
         }.bind(this))
+    },
+    getCachedValue (key, ttlInSeconds) {
+      let items = window.localStorage.getItem(key)
+      if (items) {
+        items = JSON.parse(items)
+        if (items.timestamp + (ttlInSeconds * 1000) > new Date().getTime()) {
+          console.log('using ' + key + ' from localStorage, trigger cache invalidation at settings')
+          return items.value
+        }
+      }
+      return false
+    },
+    cacheValue (key, value) {
+      window.localStorage.setItem(key, JSON.stringify({
+        timestamp: new Date().getTime(),
+        value: value
+      }));
     }
   },
-  template: '<App :loadingCount="loadingCount" :issues="issues" :users="users" :projects="projects" :redmineConfig="redmineConfig" :velocity="velocity" />',
+  template: '<App :loadingCount="loadingCount" :status="status" :issues="issues" :users="users" :projects="projects" :redmineConfig="redmineConfig" :velocity="velocity" />',
   components: {App}
 })

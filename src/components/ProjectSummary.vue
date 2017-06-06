@@ -9,7 +9,7 @@
         </tr>
         </thead>
         <tbody>
-        <tr v-for="projectEntry in projectSummary">
+        <tr v-for="projectEntry in projectSummary" :key="projectEntry.projectId">
             <td :title="projectEntry.projectBreadcrumb">
                 {{ projectEntry.projectPrefix }}
                 <span class="project" :project="'project' + projectEntry.projectId" @click="bus.$emit('projectClick', projectEntry.projectId)">
@@ -18,19 +18,19 @@
             </td>
 
             <td>
-                <div v-for="issuesByTracker in projectEntry.issuesByTracker">
+                <div v-for="issuesByTracker in projectEntry.issuesByTracker" :key="issuesByTracker.trackerName">
                     {{ issuesByTracker.trackerName }}
                 </div>
             </td>
 
             <td>
-                <div v-for="issuesByTracker in projectEntry.issuesByTracker">
+                <div v-for="issuesByTracker in projectEntry.issuesByTracker" :key="issuesByTracker.trackerName">
                     {{ issuesByTracker.issues.length }}
                 </div>
             </td>
 
             <td>
-                <div v-for="issuesByTracker in projectEntry.issuesByTracker">
+                <div v-for="issuesByTracker in projectEntry.issuesByTracker" :key="issuesByTracker.trackerName">
                     {{ estimationFrom(issuesByTracker.issues) }}
                 </div>
             </td>

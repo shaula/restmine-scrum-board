@@ -7,6 +7,7 @@
             <h1 class="sprint" @click="changeCurrentSprint">
               Sprint&nbsp;#{{ redmineConfig.sprintNumber }}
             </h1>
+            <span class="status" :class="'status-' + status">{{ status }}</span>
           </a>
         </li>
         <li class="with-settings is-active">
@@ -40,7 +41,7 @@
 
           <div id="board" v-if="loadingCount == 0">
             <div id="head" class="row">
-              <div v-for="column in redmineConfig.columns" class="column" :class="'column' + column.abbr">
+              <div v-for="column in redmineConfig.columns" class="column" :class="'column' + column.abbr" :key="column.abbr">
                 <h3>
                   {{ column.name }}
                   <span class="issues-count">({{ issuesByStatuses(column.statuses).length }})</span>
@@ -80,9 +81,16 @@
       </div>
       <div class="c-tab">
         <div class="c-tab__content">
-          <label>Sprint Number
-            <input type="text" :value="redmineConfig.sprintNumber" @change="sprintNumberChange">
-          </label>
+          <div class="setting">
+            <label>Sprint Number
+              <input type="text" :value="redmineConfig.sprintNumber" @change="sprintNumberChange">
+            </label>
+          </div>
+          <div class="setting">
+            <label>Cache
+              <button @click="invalidateCache" title="remove projects and users from cache">invalidate</button>
+            </label>
+          </div>
         </div>
       </div>
     </div>
@@ -116,8 +124,20 @@
     text-align: left;
   }
 
+  h1.sprint {
+    text-align: center;
+  }
+
   h3 {
     margin: 0;
+  }
+
+  .status-offline {
+    color: darkred
+  }
+
+  .status-online {
+    color: darkgreen;
   }
 
   .icon-loader {
@@ -363,6 +383,9 @@
   #userListHandle:hover .user:hover {
     border-color: darkblue;
   }
+  .setting {
+    margin: 10px;
+  }
 </style>
 
 <script>
@@ -462,7 +485,7 @@
 
   export default {
     name: 'app',
-    props: ['loadingCount', 'issues', 'projects', 'redmineConfig', 'users', 'velocity'],
+    props: ['loadingCount', 'issues', 'projects', 'redmineConfig', 'status', 'users', 'velocity'],
     data () {
       return {
         settings: {
@@ -667,6 +690,9 @@
       },
       sprintNumberChange (evt) {
         this.bus.$emit('sprintNumberChange', evt.target.value)
+      },
+      invalidateCache () {
+        window.localStorage.clear()
       }
     },
     components: {

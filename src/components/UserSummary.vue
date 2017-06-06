@@ -9,23 +9,23 @@
         </tr>
         </thead>
         <tbody>
-        <tr v-for="userEntry in userSummary" :class="'user' + userEntry.userId">
+        <tr v-for="userEntry in userSummary" :key="userEntry.userId" :class="'user' + userEntry.userId">
             <td :title="userEntry.lastLogin">{{ userEntry.userName }}</td>
 
             <td>
-                <div v-for="issuesByTracker in userEntry.issuesByTracker">
+                <div v-for="issuesByTracker in userEntry.issuesByTracker" :key="issuesByTracker.trackerName">
                     {{ issuesByTracker.trackerName }}
                 </div>
             </td>
 
             <td>
-                <div v-for="issuesByTracker in userEntry.issuesByTracker">
+                <div v-for="issuesByTracker in userEntry.issuesByTracker" :key="issuesByTracker.trackerName">
                     {{ issuesByTracker.issues.length }}
                 </div>
             </td>
 
             <td>
-                <div v-for="issuesByTracker in userEntry.issuesByTracker">
+                <div v-for="issuesByTracker in userEntry.issuesByTracker" :key="issuesByTracker.trackerName">
                     {{ estimationFrom(issuesByTracker.issues) }}
                 </div>
             </td>

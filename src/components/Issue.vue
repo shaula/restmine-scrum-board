@@ -17,8 +17,8 @@
             <Avatar :user="assignee" />
         </div>
 
-        <div class="issue-group-status">
-            <span class="isusue-status">{{ status }}</span>
+        <div class="issue-group-status" :title="updatedAtTitle">
+            <span class="issue-status">{{ status }}</span>
             <span class="issue-estimation">{{ estimation }}</span>
             <span class="issue-done-ratio">{{ doneRatio }}</span>
             <span class="issue-developer-hours">{{ developerHours }}</span>
@@ -61,7 +61,7 @@
     }
 
     .issue a:hover {
-        color: #42b983;
+        color: rgb(66, 139, 202);
     }
 
     .issue-group-about {
@@ -162,6 +162,9 @@
       },
       projectUrl () {
         return this.redmineUrl + '/projects/' + this.issue.project.id
+      },
+      updatedAtTitle () {
+        return 'updated at ' + (new Date(this.issue.updated_on)).toLocaleString()
       },
     },
     components: {

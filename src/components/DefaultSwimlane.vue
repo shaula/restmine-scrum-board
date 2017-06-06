@@ -20,12 +20,22 @@
       sortedIssues () {
         let issues = Object.values(this.issues)
 
+        /* sort project-wise *
         const sortedProjectIds = this.getProjectEntryIds(this.projectHierarchy)
 
         issues = issues.sort(function (a, b) {
           let aIndex = sortedProjectIds.indexOf(a.project.id)
           let bIndex = sortedProjectIds.indexOf(b.project.id)
           return (aIndex < bIndex) ? -1 : ((aIndex > bIndex) ? 1 : 0)
+        })
+        /**/
+
+        /* sort by updated_on DESC */
+        issues = issues.sort(function (a, b) {
+          let aUpdatedOn = new Date(a.updated_on)
+          let bUpdatedOn =  new Date(b.updated_on)
+
+          return (aUpdatedOn < bUpdatedOn) ? 1 : ((aUpdatedOn > bUpdatedOn) ? -1 : 0)
         })
 
         return issues
