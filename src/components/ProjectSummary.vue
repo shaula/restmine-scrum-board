@@ -18,19 +18,19 @@
             </td>
 
             <td>
-                <div v-for="issuesByTracker in projectEntry.issuesByTracker" :key="issuesByTracker.trackerName">
+                <div v-for="issuesByTracker in projectEntry.issuesByTracker" :key="'name' + issuesByTracker.trackerName">
                     {{ issuesByTracker.trackerName }}
                 </div>
             </td>
 
             <td>
-                <div v-for="issuesByTracker in projectEntry.issuesByTracker" :key="issuesByTracker.trackerName">
+                <div v-for="issuesByTracker in projectEntry.issuesByTracker" :key="'length' + issuesByTracker.trackerName">
                     {{ issuesByTracker.issues.length }}
                 </div>
             </td>
 
             <td>
-                <div v-for="issuesByTracker in projectEntry.issuesByTracker" :key="issuesByTracker.trackerName">
+                <div v-for="issuesByTracker in projectEntry.issuesByTracker" :key="'estimation' + issuesByTracker.trackerName">
                     {{ estimationFrom(issuesByTracker.issues) }}
                 </div>
             </td>
@@ -66,10 +66,7 @@
           if (this.issues.hasOwnProperty(index)) {
             let issue = this.issues[index]
             let dataKey = issue.project.id
-
-            if (!data.hasOwnProperty(dataKey)) {
-              this.addProject(issue.project.id, data)
-            }
+            this.addProjectIfMissing(issue.project.id, data)
 
             if (!data[dataKey].issuesByTracker.hasOwnProperty(issue.tracker.id)) {
               data[dataKey].issuesByTracker[issue.tracker.id] = {
@@ -150,7 +147,11 @@
         }
         return depth
       },
-      addProject (projectId, data, level = 0) {
+      addProjectIfMissing (projectId, data, level = 0) {
+        if (data.hasOwnProperty(projectId)) { // already set --> skip
+          return;
+        }
+
         const indention = 3
 
         let project = this.projects[projectId]
@@ -164,7 +165,7 @@
           issuesByTracker: {}
         }
         if (project.parent) {
-          this.addProject(project.parent.id, data, level + 1)
+          this.addProjectIfMissing(project.parent.id, data, level + 1)
         }
       }
     },
