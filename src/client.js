@@ -50,7 +50,7 @@ const vue = new Vue({
       sprintNumber: null,
       url: null
     },
-    status: 'online',
+    status: 'offline',
     users: {},
     velocity: []
   },
@@ -116,9 +116,9 @@ const vue = new Vue({
 
       let isFirstMessage = true
       this.ws = new WebSocket(this.apiUrl.replace(/^http/, 'ws') + '/ws/')
-      /*this.ws.onopen = function () {
-        this.ws.send(JSON.stringify({type: 'init'}));
-      }.bind(this);*/
+      this.ws.onopen = function () {
+        this.status = 'online'
+      }.bind(this);
 
       this.ws.onmessage = function (response) {
         /** @type {{lastModified: string, issues: [], sprintNumber: number}} */

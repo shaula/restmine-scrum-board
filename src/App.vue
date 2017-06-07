@@ -7,7 +7,7 @@
             <h1 class="sprint" @click="changeCurrentSprint">
               Sprint&nbsp;#{{ redmineConfig.sprintNumber }}
             </h1>
-            <span class="status" :class="'status-' + status">{{ status }}</span>
+            <span class="status link" :class="'status-' + status" @click="reload" title="Click to reload">{{ status }}</span>
           </a>
         </li>
         <li class="with-settings is-active">
@@ -197,9 +197,7 @@
     background-color: #f3eacf
   }
 
-  /* dynamically clickable */
-  .issue-tracker, .issue-subject,
-  .issue-project {
+  .link {
     cursor: pointer;
   }
 
@@ -693,7 +691,10 @@
       },
       invalidateCache () {
         window.localStorage.clear()
-      }
+      },
+      reload () {
+        location.reload()
+      },
     },
     components: {
       Avatar,
