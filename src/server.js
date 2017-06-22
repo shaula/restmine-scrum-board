@@ -8,7 +8,7 @@ const proxy = require('express-http-proxy')
 const express = require('express')
 
 /**
- * @type {{ redmine: {server: string, api_key: string, customStoryPointsFieldId: number}, pollingCycleInSeconds: number, port: number, clientPort: number, velocityHistoryLength: number}}
+ * @type {{ redmine: {url: string, api_key: string, customStoryPointsFieldId: number, customSprintNumberFieldId: number}, pollingCycleInSeconds: number, port: number, clientPort: number, velocityHistoryLength: number}}
  */
 const config = require(path.join(__dirname, '..', 'config/config.json'))
 
@@ -16,7 +16,7 @@ function setupStaticServing (app) {
   app.use('/', express.static(__dirname + '/../dist'))
 }
 
-function setupProxy(app) {
+function setupProxy (app) {
   app.use(proxy(config.redmine.url, {
     proxyReqOptDecorator: function (proxyReqOpts, srcReq) {
       proxyReqOpts.headers['Accept'] = 'application/json'
@@ -32,9 +32,9 @@ function setupProxy(app) {
   }))
 }
 
-function setupWebSocket(app) {
-  app.ws('/ws', function(ws, req) {
-    ws.on('message', function(msg) {
+function setupWebSocket (app) {
+  app.ws('/ws', function (ws, req) {
+    ws.on('message', function (msg) {
       const json = JSON.parse(msg)
       if (json.type === 'sprintNumberChange') {
         const sprintNumber = parseInt(json.data)
@@ -58,6 +58,9 @@ function setupWebSocket(app) {
           })
           .then(loadAndSendVelocity.bind(this, ws, sprintNumber))
           .then(houseKeepIssues)
+          .catch(function () {
+            // ignore
+          })
       } else if (json.type === 'velocity') {
 
       }
@@ -124,6 +127,9 @@ setInterval(function () {
           })
         })
       })
+      .catch(function () {
+        // ignore
+      })
   }
 }, config.pollingCycleInSeconds * 1000)
 
@@ -151,7 +157,7 @@ function getIssues (sprintNumber, offset = 0, reload = false) {
   options.headers = {
     'X-Redmine-API-Key': config.redmine.api_key
   }
-  https.get(options, function (response) {
+  const getRequest = https.get(options, function (response) {
     // continuously update stream with data
     let body = ''
 
@@ -170,6 +176,7 @@ function getIssues (sprintNumber, offset = 0, reload = false) {
           response: body,
           exception: e
         })
+        deferred.reject();
         return
       }
       getIssuesData[sprintNumber] = getIssuesData[sprintNumber].concat(data.issues)
@@ -181,11 +188,19 @@ function getIssues (sprintNumber, offset = 0, reload = false) {
           .then(function () {
             deferred.resolve(getIssuesData[sprintNumber])
           })
+          .catch(function () {
+            deferred.reject();
+          })
       } else {
         // retrieved all issues within one page
         deferred.resolve(getIssuesData[sprintNumber])
       }
     })
+  })
+
+  getRequest.on('error', function (err) {
+    console.log('Caught error, ignoring', err)
+    deferred.reject()
   })
 
   return deferred.promise
@@ -217,6 +232,9 @@ function loadHistoricIssues (sprintNumbers, data = new SortedArrayMap()) {
       store.issuesBySprintNumber.set(sprintNumber, issues)
       data.set(sprintNumber, issues)
       return loadHistoricIssues(sprintNumbers, data)
+    })
+    .catch(function () {
+      // ignore
     })
 }
 
