@@ -116,3 +116,5 @@ location /ws/ {
 * Issues tab
     * drag & drop issues across status
     * drag & drop users onto issues
+* Distribution tab
+    * show doneRatio - this is complicated as the `spent_hours` field is only available in issues-detail view, but not within issues-list view

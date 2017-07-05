@@ -98,7 +98,6 @@
       },
       onDrop (evt) {
         console.log('drop')
-        debugger
       }
     },
     components: {

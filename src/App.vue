@@ -27,6 +27,9 @@
           <a href="#" class="c-tabs-nav__link">Velocity</a>
         </li>
         <li>
+          <a href="#" class="c-tabs-nav__link" @click="getBurndown">Burndown</a>
+        </li>
+        <li>
           <a href="#" class="c-tabs-nav__link">Settings</a>
         </li>
       </ul>
@@ -77,6 +80,13 @@
       <div class="c-tab">
         <div class="c-tab__content">
           <VelocityHistory :velocity="velocity" />
+        </div>
+      </div>
+      <div class="c-tab">
+        <div class="c-tab__content">
+          <BurndownChart :pointsByTime="burndown.pointsByTime"
+                         :startDate="burndownStartDate"
+                         :durationInDays="redmineConfig.sprintDurationInDays" />
         </div>
       </div>
       <div class="c-tab">
@@ -388,6 +398,7 @@
 
 <script>
   import Avatar from './components/Avatar'
+  import BurndownChart from './components/BurndownChart'
   import TrackerSummary from './components/TrackerSummary'
   import UserList from './components/UserList'
   import UserSummary from './components/UserSummary'
@@ -483,7 +494,7 @@
 
   export default {
     name: 'app',
-    props: ['loadingCount', 'issues', 'projects', 'redmineConfig', 'status', 'users', 'velocity'],
+    props: ['loadingCount', 'issues', 'projects', 'redmineConfig', 'status', 'users', 'velocity', 'burndown'],
     data () {
       return {
         settings: {
@@ -619,6 +630,15 @@
           }
         }
         return activeIssues
+      },
+      burndownStartDate () {
+        const date = this.redmineConfig.sprintStartDate
+
+        if (typeof date === 'string') {
+          return new Date(date)
+        }
+
+        return date
       }
     },
     methods: {
@@ -695,9 +715,13 @@
       reload () {
         location.reload()
       },
+      getBurndown () {
+        this.bus.$emit('getBurndown')
+      }
     },
     components: {
       Avatar,
+      BurndownChart,
       DefaultSwimlane,
       ProjectSummary,
       ProjectSwimlane,

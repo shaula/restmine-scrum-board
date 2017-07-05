@@ -48,23 +48,65 @@ const vue = new Vue({
       columns: {},
       customStoryPointsFieldId: null,
       sprintNumber: null,
-      url: null
+      url: null,
+      sprintDurationInDays: null,
+      sprintStartDate: null
     },
     status: 'offline',
     users: {},
-    velocity: []
+    velocity: [],
+    burndown: {},
+    loadingBurndown: false
   },
   created () {
     this.bus.$on('sprintNumberChange', function (sprintNumber) {
       this.issues = {}
       this.velocity = []
+      this.burndown = {}
+
+      this.redmineConfig.sprintNumber = ''
 
       this.bus.$emit('loading')
 
       this.ws.send(JSON.stringify({
-        type: 'sprintNumberChange',
-        data: sprintNumber
+        type: 'configChange',
+        data: [
+          {
+            type: 'sprintNumber',
+            value: sprintNumber
+          }
+        ]
       }))
+    }.bind(this))
+
+    this.bus.$on('getBurndown', function () {
+      if (this.loadingBurndown === false) {
+        this.burndown = {}
+        this.loadingBurndown = true
+
+        this.ws.send(JSON.stringify({
+          type: 'getBurndown'
+        }))
+      }
+    }.bind(this))
+
+    this.bus.$on('burndownChange', function (payload) {
+      this.ws.send(JSON.stringify({
+        type: 'configChange',
+        data: [
+          {
+            type: 'sprintDurationInDays',
+            value: payload.sprintDurationInDays
+          },
+          {
+            type: 'sprintStartDate',
+            value: payload.sprintStartDate
+          }
+        ]
+      }))
+
+      this.redmineConfig.sprintStartDate = payload.sprintStartDate
+      this.redmineConfig.sprintDurationInDays = payload.sprintDurationInDays
     }.bind(this))
 
     this.bus.$on('loading', function () {
@@ -118,7 +160,7 @@ const vue = new Vue({
       this.ws = new WebSocket(this.apiUrl.replace(/^http/, 'ws') + '/ws/')
       this.ws.onopen = function () {
         this.status = 'online'
-      }.bind(this);
+      }.bind(this)
 
       this.ws.onmessage = function (response) {
         /** @type {{lastModified: string, issues: [], sprintNumber: number}} */
@@ -126,15 +168,19 @@ const vue = new Vue({
 
         if (json.type === 'config') {
           this.redmineConfig = json.config
-          Vue.prototype.redmineUrl = this.redmineConfig.url;
+          Vue.prototype.redmineUrl = this.redmineConfig.url
         } else if (json.type === 'sprintNumberChange') {
           this.redmineConfig.sprintNumber = json.sprintNumber
+          this.bus.$emit('getBurndown')
           this.bus.$emit('loaded')
         } else if (json.type === 'issues') {
           this.setIssues(json.issues, json.lastModified)
           this.redmineConfig.sprintNumber = json.sprintNumber
         } else if (json.type === 'velocity') {
           this.velocity = json.data
+        } else if (json.type === 'burndown') {
+          this.burndown = json.data
+          this.loadingBurndown = false
         } else {
           console.log('Unhandled WS message: ' + response.data)
         }
@@ -161,7 +207,7 @@ const vue = new Vue({
           console.log('WebSocket error:' + evt.type)
           this.reconnectWebSocket()
         }
-      }.bind(this);
+      }.bind(this)
     },
     reconnectWebSocket: function () {
       console.error('set offline')
@@ -171,7 +217,7 @@ const vue = new Vue({
       window.setTimeout(function () {
         console.debug('Try to re-establish WebSocket connection')
         this.loadingCount = 0
-        this.setupWebSocket();
+        this.setupWebSocket()
       }.bind(this), 10000)
     },
     setIssues (data, lastModified) {
@@ -283,9 +329,10 @@ const vue = new Vue({
       window.localStorage.setItem(key, JSON.stringify({
         timestamp: new Date().getTime(),
         value: value
-      }));
+      }))
     }
   },
-  template: '<App :loadingCount="loadingCount" :status="status" :issues="issues" :users="users" :projects="projects" :redmineConfig="redmineConfig" :velocity="velocity" />',
+  template: '<App :loadingCount="loadingCount" :status="status" :issues="issues" :users="users" :projects="projects"' +
+  ' :redmineConfig="redmineConfig" :velocity="velocity" :burndown="burndown" />',
   components: {App}
 })

@@ -21,6 +21,7 @@
     "express-http-proxy": "^1.0.3",
     "express-ws": "^3.0.0",
     "md5": "^2.2.1",
+    "pikaday-time": "^1.5.1",
     "vue": "^2.3.3",
     "vue-draggable": "^1.0.0-rc.3",
     "vuedraggable": "^2.11.0"

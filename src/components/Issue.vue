@@ -4,6 +4,7 @@
         <div class="issue-group-about">
             <a class="issue-subject" :href="issueUrl">
                 <span class="issue-tracker">{{ trackerName }}</span>
+                <span class="issue-id">{{ issue.id }}</span>
                 {{ subject }}
             </a>
             <a v-if="!hideProject" class="issue-project"
@@ -95,7 +96,8 @@
         display: block;
     }
 
-    .issue .issue-tracker {
+    .issue .issue-tracker,
+    .issue .issue-id {
         font-weight: bold;
     }
 
@@ -103,16 +105,27 @@
         margin: 5px 0;
     }
 
-    .issue .issue-tracker {
+    .issue .issue-tracker,
+    .issue .issue-id {
         display: inline;
     }
 
-    .issue .issue-tracker:after {
+    .issue .issue-id:before {
+        content: " #";
+    }
+
+    .issue .issue-id:after {
         content: ": ";
     }
 
     .issue .issue-tracker {
         font-weight: bold;
+    }
+
+    .issue .issue-subject {
+        -webkit-hyphens: auto;
+        -moz-hyphens: auto;
+        hyphens: auto;
     }
 </style>
 

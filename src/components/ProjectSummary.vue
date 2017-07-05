@@ -30,9 +30,8 @@
             </td>
 
             <td>
-                <div v-for="issuesByTracker in projectEntry.issuesByTracker" :key="'estimation' + issuesByTracker.trackerName">
-                    {{ estimationFrom(issuesByTracker.issues) }}
-                </div>
+                <div v-for="issuesByTracker in projectEntry.issuesByTracker" :key="'estimation' + issuesByTracker.trackerName"
+                     v-html="estimationFrom(issuesByTracker.issues)"></div>
             </td>
         </tr>
         </tbody>
@@ -41,14 +40,14 @@
             <th>Total</th>
             <th></th>
             <th>{{ issuesLength }}</th>
-            <th>{{ estimationFrom(issues)}}</th>
+            <th v-html="estimationFrom(issues)"></th>
         </tr>
         </tfoot>
     </table>
 </template>
 
 <script>
-  import { estimationFrom } from '../helpers'
+  import { leftOfEstimationFrom, estimationFrom} from '../helpers';
 
   export default {
     name: 'ProjectSummary',
@@ -114,6 +113,7 @@
       }
     },
     methods: {
+      leftOfEstimationFrom: leftOfEstimationFrom,
       estimationFrom: estimationFrom,
       projectBreadcrumbOf (projectId, separator = ' --> ') {
         if (!Object.keys(this.projects).length) {

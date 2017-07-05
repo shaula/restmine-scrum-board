@@ -49,5 +49,6 @@
     }
   },
   "pollingCycleInSeconds": 10,
-  "velocityHistoryLength": 10
+  "velocityHistoryLength": 10,
+  "sprintDurationInDays": 14
 }

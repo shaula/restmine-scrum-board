@@ -25,9 +25,8 @@
             </td>
 
             <td>
-                <div v-for="issuesByTracker in userEntry.issuesByTracker" :key="issuesByTracker.trackerName">
-                    {{ estimationFrom(issuesByTracker.issues) }}
-                </div>
+                <div v-for="issuesByTracker in userEntry.issuesByTracker" :key="issuesByTracker.trackerName"
+                     v-html="estimationFrom(issuesByTracker.issues)"></div>
             </td>
         </tr>
         </tbody>
@@ -36,7 +35,7 @@
             <th>Total</th>
             <th></th>
             <th>{{ issuesLength }}</th>
-            <th>{{ estimationFrom(issues)}}</th>
+            <th v-html="estimationFrom(issues)"></th>
         </tr>
         </tfoot>
     </table>
@@ -47,7 +46,7 @@
 </style>
 
 <script>
-  import { estimationFrom } from '../helpers'
+  import { leftOfEstimationFrom, estimationFrom} from '../helpers';
 
   export default {
     name: 'UserSummary',
@@ -105,6 +104,7 @@
       }
     },
     methods: {
+      leftOfEstimationFrom: leftOfEstimationFrom,
       estimationFrom: estimationFrom
     },
     data () {

@@ -1,7 +1,7 @@
 <template>
   <div id="velocityHistory">
     <span v-show="!velocity.length" class="icon icon-loader"></span>
-    <svg v-show="velocity.length" class="chart" width="800" height="400"></svg>
+    <svg v-show="velocity.length" id="velocityChart" class="chart" width="800" height="400"></svg>
   </div>
 </template>
 
@@ -45,21 +45,22 @@
           return
         }
 
-        if (!this.svg) {
-          this.svg = this.initChart()
+        if (!this.chart) {
+          this.chart = this.initChart()
         }
-        this.updateChart(this.svg, data)
+        this.updateChart(this.chart, data)
       }
     },
     methods: {
       initChart () {
         // set up chart (based on https://bl.ocks.org/syncopika/f1c9036b0deb058454f825238a95b6be)
+        const svg = d3.select('#velocityChart')
+
         const margin = {top: 20, right: 20, bottom: 50, left: 50}
+        const width = svg.attr('width') - margin.left - margin.right
+        const height = svg.attr('height') - margin.top - margin.bottom
 
-        const width = d3.select('.chart').attr('width') - margin.left - margin.right
-        const height = d3.select('.chart').attr('height') - margin.top - margin.bottom
-
-        const svg = d3.select('.chart')
+        const chart = svg
           .append('g')
           .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
 
@@ -72,12 +73,12 @@
 
         // set up axes
         // left axis
-        svg.append('g')
+        chart.append('g')
           .attr('class', 'y axis')
           .call(yAxis)
 
         // bottom axis
-        svg.append('g')
+        chart.append('g')
           .attr('class', 'xAxis')
           .attr('transform', 'translate(0,' + height + ')')
           .call(xAxis)
@@ -90,12 +91,12 @@
           })
 
         // add labels
-        svg
+        chart
           .append('text')
           .attr('transform', 'translate(-35,' + (height + margin.bottom) / 2 + ') rotate(-90)')
           .text('Story Points')
 
-        svg
+        chart
           .append('text')
           .attr('transform', 'translate(' + (width / 2) + ',' + (height + margin.bottom - 5) + ')')
           .text('Velocity')
@@ -106,7 +107,7 @@
           xAxis: xAxis,
           yAxis: yAxis,
           yChart: yChart,
-          svg: svg,
+          svg: chart,
           width: width,
           height: height,
           margin: margin
