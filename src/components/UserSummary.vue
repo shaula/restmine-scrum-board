@@ -11,7 +11,9 @@
         </thead>
         <tbody>
         <tr v-for="userEntry in userSummary" :key="userEntry.userId" :class="'user' + userEntry.userId">
-            <td :title="userEntry.lastLogin">{{ userEntry.userName }}</td>
+            <td :title="userEntry.lastLogin">
+                {{ userEntry.displayName }}
+            </td>
 
             <td>
                 <div v-for="issuesByTracker in userEntry.issuesByTracker" :key="issuesByTracker.trackerName">
@@ -75,7 +77,7 @@
             if (!data.hasOwnProperty(dataKey)) {
               data[dataKey] = {
                 userId: issue.assigned_to ? issue.assigned_to.id : -1,
-                userName: dataKey > -1 ? this.users[issue.assigned_to.id].login : '- unassigned -',
+                displayName: dataKey > -1 ? this.users[issue.assigned_to.id].displayName : '- unassigned -',
                 issuesByTracker: {}
               }
             }
