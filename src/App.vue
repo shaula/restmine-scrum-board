@@ -165,7 +165,7 @@
   .row .column {
     flex: 1 20%;
     max-width: 20%;
-    margin: 0 1%;
+    margin: 0 0.5%;
   }
 
   #stats {
