@@ -19,6 +19,7 @@
         </div>
 
         <div class="issue-group-status" :title="updatedAtTitle">
+            <span v-if="priority != 'Normal'" class="issue-priority" :class="'issue-priority-' + priority.toLowerCase()" title="Priority">{{ priority }}</span>
             <span class="issue-status">{{ status }}</span>
             <span class="issue-estimation">{{ estimation }}</span>
             <span class="issue-done-ratio">{{ doneRatio }}</span>
@@ -127,6 +128,24 @@
         -moz-hyphens: auto;
         hyphens: auto;
     }
+
+    .issue .issue-priority-urgent {
+        color: #7a0000;
+    }
+
+    .issue .issue-priority-high {
+        color: #5a0000;
+    }
+
+    .issue .issue-priority-low
+    {
+        color: #666;
+    }
+
+    .issue .issue-priority-lowest
+    {
+        color: #888;
+    }
 </style>
 
 <script>
@@ -145,6 +164,9 @@
       },
       project () {
         return this.issue.project.name
+      },
+      priority () {
+      	return this.issue.priority.name
       },
       status () {
         return this.issue.status.name
