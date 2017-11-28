@@ -6,6 +6,7 @@
             <th>Type</th>
             <th>#</th>
             <th>SP</th>
+            <th>Done</th>
         </tr>
         </thead>
         <tbody>
@@ -28,6 +29,11 @@
                 <div v-for="issuesByTracker in userEntry.issuesByTracker" :key="issuesByTracker.trackerName"
                      v-html="estimationFrom(issuesByTracker.issues)"></div>
             </td>
+
+            <td>
+                <div v-for="issuesByTracker in userEntry.issuesByTracker" :key="issuesByTracker.trackerName"
+                     v-html="doneRatioFrom(issuesByTracker.issues)"></div>
+            </td>
         </tr>
         </tbody>
         <tfoot>
@@ -36,6 +42,7 @@
             <th></th>
             <th>{{ issuesLength }}</th>
             <th v-html="estimationFrom(issues)"></th>
+            <th v-html="doneRatioFrom(issues)"></th>
         </tr>
         </tfoot>
     </table>
@@ -46,7 +53,7 @@
 </style>
 
 <script>
-  import { leftOfEstimationFrom, estimationFrom} from '../helpers';
+  import { leftOfEstimationFrom, doneRatioFrom, estimationFrom} from '../helpers';
 
   export default {
     name: 'UserSummary',
@@ -81,7 +88,9 @@
               }
             }
 
-            data[dataKey].issuesByTracker[issue.tracker.id].issues.push(issue)
+            if (data[dataKey].issuesByTracker[issue.tracker.id].issues.indexOf(issue) === -1) {
+							data[dataKey].issuesByTracker[issue.tracker.id].issues.push(issue)
+						}
           }
         }
 
@@ -104,8 +113,11 @@
       }
     },
     methods: {
-      leftOfEstimationFrom: leftOfEstimationFrom,
-      estimationFrom: estimationFrom
+			doneRatioFrom (issues) {
+				return doneRatioFrom(issues) + '%'
+			},
+			estimationFrom: estimationFrom,
+			leftOfEstimationFrom: leftOfEstimationFrom
     },
     data () {
       return {}
