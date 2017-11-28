@@ -275,7 +275,6 @@ const vue = new Vue({
         }.bind(this))
     },
     getUserDisplayName (user) {
-      debugger;
       switch (this.redmineConfig.userDisplaySetting) {
         case "firstname_lastname":
           return user.firstname + ' ' + user.lastname;

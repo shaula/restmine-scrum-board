@@ -58,7 +58,7 @@
 
   export default {
     name: 'UserList',
-    props: ['headline', 'users', 'userDisplaySetting', 'inactiveUserIds'],
+    props: ['headline', 'users', 'inactiveUserIds'],
     computed: {
       sortedUsers () {
         const sortedUsers = [];
