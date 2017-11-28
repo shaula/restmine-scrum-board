@@ -13,15 +13,16 @@
         "statuses": [
           "New",
           "Accepted",
-          "Reopened",
-          "Feedback Provided"
+          "Feedback provided"
         ]
       },
       "feedback": {
         "abbr": "feedback",
         "name": "Feedback Needed",
         "statuses": [
-          "Feedback needed"
+          "Feedback needed",
+          "Reopened",
+          "On hold"
         ]
       },
       "progress": {
@@ -42,7 +43,7 @@
         "abbr": "done",
         "name": "To Deploy/Done",
         "statuses": [
-          "To Deploy",
+          "To deploy",
           "Closed"
         ]
       }
