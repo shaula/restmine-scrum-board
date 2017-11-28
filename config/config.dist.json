@@ -46,7 +46,8 @@
           "Closed"
         ]
       }
-    }
+    },
+    "userDisplay": "One of 'firstname_lastname', 'firstname_lastinitial', 'firstinitial_lastname', 'firstname', 'lastname_firstname', 'lastnamefirstname', 'lastname_comma_firstname', 'lastname',  'username'"
   },
   "pollingCycleInSeconds": 10,
   "velocityHistoryLength": 10,

@@ -58,7 +58,7 @@
 
   export default {
     name: 'UserList',
-    props: ['headline', 'users', 'inactiveUserIds'],
+    props: ['headline', 'users', 'userDisplaySetting', 'inactiveUserIds'],
     computed: {
       sortedUsers () {
         const sortedUsers = [];
@@ -68,7 +68,7 @@
           }
         }
         return sortedUsers.sort(function (userA, userB) {
-          return userA.login > userB.login
+          return userA.displayName > userB.displayName
         });
       }
     },

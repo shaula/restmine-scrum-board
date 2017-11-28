@@ -258,6 +258,7 @@ const vue = new Vue({
 
           for (let index in response.users) {
             let user = response.users[index]
+            user.displayName = this.getUserDisplayName(user);
             this.tmpUsers[user.id] = user
           }
 
@@ -272,6 +273,38 @@ const vue = new Vue({
             this.cacheValue('users', this.users)
           }
         }.bind(this))
+    },
+    getUserDisplayName (user) {
+      debugger;
+      switch (this.redmineConfig.userDisplaySetting) {
+        case "firstname_lastname":
+          return user.firstname + ' ' + user.lastname;
+
+        case 'firstname_lastinitial':
+					return user.firstname + ' ' + String(user.lastname).substr(0, 1)
+
+        case 'firstinitial_lastname':
+					return String(user.firstname).substr(0, 1) + ' ' + user.lastname;
+
+        case 'firstname':
+          return user.firstname;
+
+        case 'lastname_firstname':
+					return user.lastname + ' ' + user.firstname;
+
+        case 'lastnamefirstname':
+					return user.lastname + user.firstname;
+
+        case 'lastname_comma_firstname':
+					return user.lastname + ', ' + user.firstname;
+
+        case 'lastname':
+					return user.lastname;
+
+        case 'username':
+        default:
+					return user.login;
+      }
     },
     loadProjects (offset = 0) {
       let params = {

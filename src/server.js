@@ -8,7 +8,7 @@ const proxy = require('express-http-proxy')
 const express = require('express')
 
 /**
- * @type {{ redmine: {url: string, api_key: string, customStoryPointsFieldId: number, customSprintNumberFieldId: number}, pollingCycleInSeconds: number, port: number, clientPort: number, velocityHistoryLength: number, sprintDurationInDays: number }}
+ * @type {{ redmine: {url: string, api_key: string, customStoryPointsFieldId: number, customSprintNumberFieldId: number, userDisplay: string}, pollingCycleInSeconds: number, port: number, clientPort: number, velocityHistoryLength: number, sprintDurationInDays: number }}
  */
 const config = require(path.join(__dirname, '..', 'config/config.json'))
 
@@ -151,6 +151,7 @@ function sendConfig(ws) {
     sprintStartDate: store.sprintStartDate,
     sprintDurationInDays: store.sprintDurationInDays,
     url: config.redmine.url,
+    userDisplaySetting: config.redmine.userDisplay,
   }
   sendData(ws, {
     type: 'config',
