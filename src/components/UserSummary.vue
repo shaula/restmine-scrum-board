@@ -34,7 +34,8 @@
 
             <td>
                 <div v-for="issuesByTracker in userEntry.issuesByTracker" :key="issuesByTracker.trackerName"
-                     v-html="doneRatioFrom(issuesByTracker.issues)"></div>
+                     v-html="doneRatioFrom(issuesByTracker.issues)"
+                     :title="leftOfEstimationFrom(issuesByTracker.issues)"></div>
             </td>
         </tr>
         </tbody>
@@ -44,7 +45,8 @@
             <th></th>
             <th>{{ issuesLength }}</th>
             <th v-html="estimationFrom(issues)"></th>
-            <th v-html="doneRatioFrom(issues)"></th>
+            <th v-html="doneRatioFrom(issues)"
+                :title="leftOfEstimationFrom(issues)"></th>
         </tr>
         </tfoot>
     </table>
@@ -98,7 +100,7 @@
 
         // sort by user names
         data = Object.values(data).sort(function (a, b) {
-          return String(a.userName).localeCompare(b.userName)
+          return String(a.displayName).localeCompare(b.displayName)
         })
 
         // sort by tracker names
@@ -119,7 +121,11 @@
 				return doneRatioFrom(issues) + '%'
 			},
 			estimationFrom: estimationFrom,
-			leftOfEstimationFrom: leftOfEstimationFrom
+			leftOfEstimationFrom (issues) {
+				const div = document.createElement('div');
+				div.innerHTML = (leftOfEstimationFrom(issues) || 'no ') + 'SP left';
+				return div.innerText;
+			},
     },
     data () {
       return {}
