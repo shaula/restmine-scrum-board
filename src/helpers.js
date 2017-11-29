@@ -57,7 +57,7 @@ export function doneRatioFrom (issues) {
       if (!estimatedPoints) {
         // tracker got no Story Points - use invested time as SP
         estimatedPoints = doneRatio > 0
-          ? 100 * (issues[index].spent_hours || 0) / doneRatio
+          ? 100 * (issues[index].spent_hours || 1) / doneRatio
           : 0
       }
 
